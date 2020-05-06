@@ -26,8 +26,8 @@ For each mock endpoint, specify the...
     * json payload templated with request data
 
 See the following test data directories for example config data for a mocked endpoint:
-* getLocationById: `/src/test/query/test1/wiremock`
-* getLocationbyStatus:  `/src/test/query/test3/wiremock`
+* getLocationById: `app/querymock-app/src/test/query/test1/wiremock`
+* getLocationbyStatus:  `app/querymock-app/src/test/query/test3/wiremock`
     
 Note: At this time, the data to query cannot be templated with values from the http request. 
 The query result is substituted into the templated response payload as-is. 
