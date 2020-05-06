@@ -1,0 +1,10 @@
+[
+  {
+    "locationId": "locationId_1",
+    "status": "open"
+  },
+  {
+    "locationId": "locationId_2",
+    "status": "open"
+  }
+]

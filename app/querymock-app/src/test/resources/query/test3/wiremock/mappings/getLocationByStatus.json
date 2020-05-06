@@ -1,0 +1,11 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/location\\?status=([A-Za-z0-9-_]+)"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "queryLocationByStatus.json",
+    "transformers": ["body-transformer", "query-transformer"]
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "query": "locationId == '$(id)'",
+  "data": "location.json",
+  "findOne": true,
+  "bodyTemplate": {
+    "Data": "{{ result }}"
+  }
+}

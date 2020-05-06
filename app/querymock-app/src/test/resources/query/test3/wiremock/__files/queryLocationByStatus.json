@@ -1,0 +1,5 @@
+{
+  "query": "status == '$(status)'",
+  "data": "location.json",
+  "findOne": false
+}

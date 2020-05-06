@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/location/([A-Za-z0-9-_]+)"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "queryLocationById.json",
+    "transformers": ["body-transformer", "query-transformer"],
+    "transformerParameters": {
+      "urlRegex": "/location/(?<id>.*?)"
+    }
+  }
+}
