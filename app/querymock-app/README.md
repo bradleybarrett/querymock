@@ -1,7 +1,9 @@
 ### QueryMock Overview
 
 A containerized mock server that can mock query endpoints! 
-Configured with json files and managed by simple, language-specific clients. 
+
+Configured with json files and managed by simple, language-specific clients.
+
 Define an endpoint mapping and data set, then query that data using mvel expressions templated with request info.
 
 Example endpoints mocked by a query:
