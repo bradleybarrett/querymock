@@ -1,30 +1,19 @@
 package com.bbarrett.querymock.client;
 
+import org.json.JSONException;
 import org.junit.After;
 import org.junit.Test;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URL;
+import java.io.IOException;
 import java.util.HashMap;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class MockManagerTest
 {
     private String locationMock = "location-service-mock";
-    private int locationPort = 8090;
-
-    @Test
-    public void test()
-    {
-        MockManager.startMock(locationMock, locationPort, getPathToResource("wiremock"));
-        MockManager.waitForMocks(locationMock);
-
-        /* Code under test that makes an http call to an external service. */
-        Object result = getLocationById("locationId_1");
-
-        assertThat(result).isNotNull();
-    }
+    private int locationMockAdminPort = 8090;
+    private int locationServicePort = 8091;
 
     @After
     public void cleanUp()
@@ -32,10 +21,43 @@ public class MockManagerTest
         MockManager.stopMocks(locationMock);
     }
 
-    private static String getPathToResource(String relativePath)
+    @Test
+    public void testStartWaitStop() throws IOException, JSONException
     {
-        URL url = MockManagerTest.class.getClassLoader().getResource(relativePath);
-        return url.getPath();
+        String directory = "testStartWaitStop";
+
+        /* Start a new mock instance. */
+        MockManager.startMock(locationMock, locationMockAdminPort, locationServicePort,
+                TestUtil.getResource(directory).getPath(), "/wiremock");
+        MockManager.waitForMocks(locationMock);
+
+        /* Makes an external call to the mock service. */
+        String outputResponse = getLocationById("locationId_1");
+
+        TestUtil.assertJsonEquals(directory + "/expected/response.json",
+                outputResponse, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    public void testReconfigureWaitStop() throws IOException, JSONException
+    {
+        String directory = "testReconfigureWaitStop";
+
+        /* Start a new mock instance. */
+        MockManager.startMock(locationMock, locationMockAdminPort, locationServicePort,
+                TestUtil.getResource(directory).getPath(), "");
+        MockManager.waitForMocks(locationMock);
+
+        /* Start the mock by reconfiguring the existing mock. */
+        MockManager.startMock(locationMock, locationMockAdminPort, locationServicePort,
+                TestUtil.getResource(directory).getPath(), "/wiremock");
+        MockManager.waitForMocks(locationMock);
+
+        /* Makes an external call to the mock service. */
+        String outputResponse = getLocationById("locationId_1");
+
+        TestUtil.assertJsonEquals(directory + "/expected/response.json",
+                outputResponse, JSONCompareMode.STRICT);
     }
 
     private String getUrl(int port, String endpointPath)
@@ -43,13 +65,13 @@ public class MockManagerTest
         return "http://localhost:" + port + endpointPath;
     }
 
-    private Object getLocationById(String locationId)
+    private String getLocationById(String locationId)
     {
         RestTemplate restTemplate = new RestTemplate();
         HashMap<String, Object> pathVars = new HashMap<>();
         pathVars.put("locationId", locationId);
         return restTemplate.getForObject(
-                getUrl(locationPort, "/location/{locationId}"),
+                getUrl(locationServicePort, "/location/{locationId}"),
                 String.class, pathVars);
     }
 }

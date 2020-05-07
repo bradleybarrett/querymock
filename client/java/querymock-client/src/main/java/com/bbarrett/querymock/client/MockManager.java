@@ -2,6 +2,7 @@ package com.bbarrett.querymock.client;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
@@ -9,54 +10,75 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 public class MockManager
 {
-    private static final String portLabel = "com.querymock.port";
+    private static final String adminPortLabel = "com.querymock.port.admin";
+    private static final String wiremockPortLabel = "com.querymock.port.wiremock";
     private static final RestTemplate restTemplate = new RestTemplate();
 
     /**
-     * Start a mock instance.
+     * Start a mock instance using the wiremock resources located at the wiremockSubDir within the resourceDir.
+     * Reuse an existing querymock instance if one already exists with the provided name and port mappings.
      *
      * @param name Container name of the mock instance.
-     * @param port Host port mapped to wiremock instance of the container.
-     * @param resourceDir Absolute path of the wiremock resource files on the host.
+     * @param adminPort Host port mapped to the rest controller of the container.
+     * @param wiremockPort Host port mapped to wiremock instance of the container.
+     * @param resourceDir Absolute path of host resource directory with data for all test scenarios.
+     * @param wiremockSubDir Relative path to wiremock resources for the test scenario.
      */
-    public static void startMock(String name, int port, String resourceDir)
+    public static void startMock(String name, int adminPort, int wiremockPort, String resourceDir,
+                                 String wiremockSubDir)
     {
-        startMock(name, port, resourceDir, "bbarrett/querymock:latest");
+        startMock(name, adminPort, wiremockPort, resourceDir, wiremockSubDir, "bbarrett/querymock:latest");
     }
 
     /**
-     * Start a mock instance.
+     * Start a mock instance using the wiremock resources located at the wiremockSubDir within the resourceDir.
+     * Reuse an existing querymock instance if one already exists with the provided name and port mappings.
      *
      * @param name Container name of the mock instance.
-     * @param port Host port mapped to wiremock instance of the container.
-     * @param resourceDir Absolute path of the wiremock resource files on the host.
+     * @param adminPort Host port mapped to the rest controller of the container.
+     * @param wiremockPort Host port mapped to wiremock instance of the container.
+     * @param resourceDir Absolute path of host resource directory with data for all test scenarios.
+     * @param wiremockSubDir Relative path to wiremock resources for the test scenario.
      * @param image Docker image to start (name of some QueryMock image on the host).
      */
-    public static void startMock(String name, int port, String resourceDir, String image)
+    public static void startMock(String name, int adminPort, int wiremockPort, String resourceDir,
+                                 String wiremockSubDir, String image)
     {
-        int containerWiremockPort = 8081;
-        String containerWiremockDirectory = "/wiremock";
-
-        executeCommand("docker", "run", "-it", "-d",
-                "--name", name,
-                "-l", portLabel + "=" + port,
-                "-p", port + ":" + containerWiremockPort,
-                "-v", resourceDir + ":" + containerWiremockDirectory,
-                image,
-                "--wiremock.directory=" + containerWiremockDirectory);
+        /* check if mock exists with name and port mappings */
+        Integer existingAdminPort = getPortForMock(name, adminPortLabel);
+        Integer existingWiremockPort = getPortForMock(name, wiremockPortLabel);
+        if (existingAdminPort == null && existingWiremockPort == null)
+        {
+            /* start a new instance */
+            startNewMock(name, adminPort, wiremockPort, resourceDir, wiremockSubDir, image);
+        }
+        else if (!Integer.valueOf(adminPort).equals(existingAdminPort)
+                || !Integer.valueOf(wiremockPort).equals(existingWiremockPort))
+        {
+            /* stop the existing instance because the new instance requires different ports */
+            stopMocks(name);
+            startNewMock(name, adminPort, wiremockPort, resourceDir, wiremockSubDir, image);
+        }
+        else /* a mock instance exists with all the requested ports */
+        {
+            /* reconfigure the existing instance */
+            reconfigureMock(adminPort, wiremockSubDir);
+        }
     }
 
     /**
      * Stop the provided mock instances.
+     *
+     * Most tests should not call this method. Always be prefer reconfiguring an existing mock to starting a new mock.
+     * Reconfiguring is about 10x faster than starting a new instances. Reconfiguring n mocks takes about 1s.
+     * Starting a new instance for n mocks takes about 10s (depending on the memory and compute resources provided
+     * to docker).
      *
      * @param names Container names of mock instances to stop.
      */
@@ -113,7 +135,7 @@ public class MockManager
         try
         {
             ResponseEntity<Object> responseEntity = restTemplate.getForEntity(
-                    getUrl(getPortForMock(name), "/__admin/mappings?limit=1"),
+                    getUrl(getPortForMock(name, wiremockPortLabel), "/__admin/mappings?limit=1"),
                     Object.class);
             status = responseEntity.getStatusCode();
         }
@@ -125,7 +147,7 @@ public class MockManager
         return HttpStatus.OK.equals(status);
     }
 
-    private static Integer getPortForMock(String name)
+    private static Integer getPortForMock(String name, String portLabel)
     {
         String inspectTemplate = "{{ index .Config.Labels \"" + portLabel + "\"}}";
         InputStream inputStream = executeCommand("docker", "inspect", "--format", inspectTemplate, name);
@@ -134,7 +156,11 @@ public class MockManager
         Integer port;
         try
         {
-            port = Integer.valueOf(bufferedReader.readLine());
+            String portString = bufferedReader.readLine();
+            if (StringUtils.isEmpty(portString))
+                port = null;
+            else
+                port = Integer.valueOf(portString);
             bufferedReader.close();
         }
         catch (IOException ioException)
@@ -144,6 +170,49 @@ public class MockManager
         }
 
         return port;
+    }
+
+    private static void reconfigureMock(int adminPort, String wiremockSubDir)
+    {
+        HttpStatus status;
+        try
+        {
+            ResponseEntity<Object> responseEntity = restTemplate.getForEntity(
+                    getUrl(adminPort, "/querymock/reconfigure?subdirectory=" + wiremockSubDir),
+                    Object.class);
+            status = responseEntity.getStatusCode();
+        }
+        catch (ResourceAccessException resourceAccessException)
+        {
+            status = null;
+            resourceAccessException.printStackTrace();
+        }
+
+        if (!HttpStatus.OK.equals(status))
+        {
+            throw new RuntimeException(MessageFormat.format(
+                    "Request to reconfigure mock failed for adminPort {0} and wiremockSubDir {1}",
+                    adminPort, wiremockSubDir));
+        }
+    }
+
+    private static void startNewMock(String name, int adminPort, int wiremockPort, String resourceDir,
+                                     String wiremockSubDir, String image)
+    {
+        int containerAdminPort = 8080;
+        int containerWiremockPort = 8081;
+        String containerResourceDirectory = "/wiremock";
+
+        executeCommand("docker", "run", "-it", "-d",
+                "--name", name,
+                "-l", adminPortLabel + "=" + adminPort,
+                "-l", wiremockPortLabel + "=" + wiremockPort,
+                "-p", adminPort + ":" + containerAdminPort,
+                "-p", wiremockPort + ":" + containerWiremockPort,
+                "-v", resourceDir + ":" + containerResourceDirectory,
+                image,
+                "--resource.directory=" + containerResourceDirectory,
+                "--resource.subdirectory.wiremock=" + wiremockSubDir);
     }
 
     private static String getUrl(Integer port, String endpointPath)
