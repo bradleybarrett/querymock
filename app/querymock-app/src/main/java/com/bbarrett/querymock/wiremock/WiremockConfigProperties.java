@@ -13,8 +13,11 @@ public class WiremockConfigProperties
     @Value("${wiremock.port}")
     private int port;
 
-    @Value("${wiremock.directory}")
+    @Value("${resource.directory}")
     private String directory;
+
+    @Value("${resource.subdirectory.wiremock}")
+    private String wiremockDirectory;
 
     public int getPort() {
         return port;
@@ -30,5 +33,13 @@ public class WiremockConfigProperties
 
     public void setDirectory(String directory) {
         this.directory = directory;
+    }
+
+    public String getWiremockDirectory() {
+        return wiremockDirectory;
+    }
+
+    public void setWiremockDirectory(String wiremockDirectory) {
+        this.wiremockDirectory = wiremockDirectory;
     }
 }

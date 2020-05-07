@@ -28,7 +28,7 @@ class QueryTest
 		String directory = baseDirectory + "/test1";
 
 		/* Configure mock endpoints and set up data. */
-		wiremockInstance.reconfigureMocks(TestUtil.getResource(directory + "/wiremock").getPath());
+		wiremockInstance.reconfigureMocks(TestUtil.getResource(directory).getPath(), "/wiremock");
 		String locationId = "locationId_1";
 
 		/* Make a rest call to the mock service. */
@@ -52,7 +52,7 @@ class QueryTest
 		String directory = baseDirectory + "/test2";
 
 		/* Configure mock endpoints and set up data. */
-		wiremockInstance.reconfigureMocks(TestUtil.getResource(directory + "/wiremock").getPath());
+		wiremockInstance.reconfigureMocks(TestUtil.getResource(directory).getPath(), "/wiremock");
 		String locationId = "locationId_4";
 
 		/* Make a rest call to the mock service. */
@@ -75,7 +75,7 @@ class QueryTest
 		String directory = baseDirectory + "/test3";
 
 		/* Configure mock endpoints and set up data. */
-		wiremockInstance.reconfigureMocks(TestUtil.getResource(directory + "/wiremock").getPath());
+		wiremockInstance.reconfigureMocks(TestUtil.getResource(directory).getPath(), "/wiremock");
 		String status = "open";
 
 		/* Make a rest call to the mock service. */

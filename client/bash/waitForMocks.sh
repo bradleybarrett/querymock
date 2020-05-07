@@ -31,16 +31,16 @@ pollMockServer()
 }
 
 # Get the wiremock application port for the provided container name: ex. getPortForContainer mock-1
-getPortForContainer()
+getWiremockPortForMock()
 {
-  echo $(docker inspect --format '{{ index .Config.Labels "com.querymock.port"}}' $1)
+  echo $(docker inspect --format '{{ index .Config.Labels "com.querymock.wiremock.port"}}' $1)
 }
 
 # Poll the mock server running on each of the provided containers.
 # Accept container names as space-delimited arguments: ex. ./waitForMocks.sh mock-1 mock-2 mock-3
 while [ "$1" != "" ];
 do
-  port=$(getPortForContainer $1)
+  port=$(getWiremockPortForMock $1)
   pollMockServer $port
   shift
 done

@@ -25,28 +25,32 @@ public class WiremockInstance
     @PostConstruct
     public void init()
     {
+        String pathToWiremockResources = wiremockConfigProperties.getDirectory()
+                + wiremockConfigProperties.getWiremockDirectory();
+
         // Create a BodyTransformer extension.
         BodyTransformer bodyTransformer = new BodyTransformer();
 
         // Create a QueryTransformer extension with the provided query data.
-        String dataDirectory = wiremockConfigProperties.getDirectory() + "/querydata";
+        String dataDirectory = pathToWiremockResources + "/querydata";
         QueryDataStore queryDataStore = new QueryDataStore(dataDirectory);
         QueryTransformer queryTransformer = new QueryTransformer(queryDataStore);
 
         // Create a wiremock instance with the custom extensions.
         wireMockServer = new WireMockServer(wireMockConfig()
                 .port(wiremockConfigProperties.getPort())
-                .usingFilesUnderDirectory(wiremockConfigProperties.getDirectory())
+                .usingFilesUnderDirectory(pathToWiremockResources)
                 .extensions(bodyTransformer, queryTransformer));
 
         // Start the wiremock instance.
         wireMockServer.start();
     }
 
-    public void reconfigureMocks(String directory)
+    public void reconfigureMocks(String directory, String wiremockDirectory)
     {
         wireMockServer.stop();
         wiremockConfigProperties.setDirectory(directory);
+        wiremockConfigProperties.setWiremockDirectory(wiremockDirectory);
         init();
     }
 
