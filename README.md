@@ -1,6 +1,8 @@
 ### QueryMock Overview
 
-A containerized mock server that can mock query endpoints! 
+A fast, containerized mock server that can mock query endpoints! 
+
+Run tests in seconds: start the mock servers once and reconfigure on the fly for subsequent tests.
 
 Configured with json files and managed by simple, language-specific clients.
 
