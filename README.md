@@ -4,7 +4,7 @@ A fast, containerized mock server that can mock query endpoints!
 
 Run tests in seconds: start the mock servers once and reconfigure on the fly for subsequent tests.
 
-Configured with json files and managed by simple, language-specific clients.
+Configured with json files and managed by simple, language-specific clients. Clients provided at this time: Bash, Java, Python.
 
 Define an endpoint mapping and data set, then query that data using mvel expressions templated with request info.
 
@@ -17,7 +17,7 @@ Useful for mocking query endpoints called multiple times in a single test.
 In this case, QueryMock lets you create one mock endpoint with dynamic data instead of multiple mock endpoints with static data.
 This reduces mock complexity and makes tests easier to write and maintain.
 
-Language-specific clients execute docker commands to manage mock servers. Each mock server is run as a container configured by json files. Java and Bash clients are implemented at this time. 
+Language-specific clients execute docker commands to manage mock servers. Each mock server is run as a container configured by json files. 
 
 QueryMock is implemented as a customized instance of WireMock with extensions for response templating and query support.
 This tool provides all the existing features of WireMock along with templates and queries.
