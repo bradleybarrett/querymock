@@ -3,7 +3,7 @@
 * [QueryMock Overview](#1)
 * [Example 1: Get location by id](#2)
 * [Example 2: Get location by status](#3)
-* [Write a Test with the Client (psuedo code example)](#4)
+* [Write a Test with the Client (pseudo code example)](#4)
 * [Implementation Details](#5)
 * [Build the Docker Image](#6)
 
@@ -217,7 +217,7 @@ Response body:
 ]
 ```
 
-## Write a Test with the Client (psuedo code example) <a name="4"></a>
+## Write a Test with the Client (pseudo code example) <a name="4"></a>
 
 #### Test resource directory with config json files for each test:
 ```
@@ -250,7 +250,7 @@ Response body:
                         location.json
 ```
 
-#### Test Psuedo Code (utilizes mock reconfiguration for faster execution times)
+#### Test Pseudo Code (utilizes mock reconfiguration for faster execution times)
 ```
 String baseDirectory = "/test/resources"
 String locationMockName = "location-mock"
@@ -270,10 +270,8 @@ startItemMock(String wiremockSubDirectory)
 
 test1()
 {
-    String testDirectory = "/test1/wiremock"
-
-    startLocationMock(testDirectory)
-    startItemMock(testDirectory)
+    startLocationMock("/test1/wiremock/location")
+    startItemMock("/test1/wiremock/item")
     querymock.waitForMocks(locationMockName, itemMockName)
 
     // execute test code here...
@@ -281,9 +279,7 @@ test1()
 
 test2()
 {
-    String testDirectory = "/test2/wiremock"
-
-    startLocationMock(testDirectory) // will reconfigure the existing location-mock
+    startLocationMock("/test2/wiremock/location) // will reconfigure the existing location-mock
     querymock.waitForMocks(locationMockName)
 
     // execute test code here...
