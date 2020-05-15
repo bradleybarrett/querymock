@@ -1,13 +1,13 @@
-## QueryMock
+## Table of Contents
 
-* [Overview](#1)
+* [QueryMock Overview](#1)
 * [Example 1: Get location by id](#2)
 * [Example 2: Get location by status](#3)
 * [Write a Test with the Client (psuedo code example)](#4)
 * [Implementation Details](#5)
 * [Build the Docker Image](#6)
 
-## Overview <a name="1"></a>
+## QueryMock Overview <a name="1"></a>
 
 A fast, containerized mock server that can mock query endpoints! 
 
