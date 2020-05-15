@@ -1,4 +1,13 @@
-## QueryMock Overview
+## QueryMock
+
+* [Overview](#1)
+* [Example 1: Get location by id](#2)
+* [Example 2: Get location by status](#3)
+* [Write a Test with the Client (psuedo code example)](#4)
+* [Implementation Details](#5)
+* [Build the Docker Image](#6)
+
+## Overview <a name="1"></a>
 
 A fast, containerized mock server that can mock query endpoints! 
 
@@ -33,7 +42,7 @@ For each mock endpoint, specify the...
 Note: At this time, the data to query cannot be templated with values from the http request. 
 The query result is substituted into the templated response payload as-is.
 
-## Example 1: Get location by id
+## Example 1: Get location by id <a name="2"></a>
 
 Endpoint to mock: 
 * ```GET /location/{locationId}```
@@ -121,7 +130,7 @@ Body of response returned by the mock server:
 }
 ```
 
-## Example 2: Get locations by status
+## Example 2: Get locations by status <a name="3"></a>
 
 #### Endpoint to mock:
 * ```GET /location?status=someValue```
@@ -208,7 +217,7 @@ Response body:
 ]
 ```
 
-## Write a test with the QueryMock client (psuedo code example)
+## Write a Test with the Client (psuedo code example) <a name="4"></a>
 
 #### Test resource directory with config json files for each test:
 ```
@@ -291,7 +300,7 @@ runAllTests()
 }
 ```
 
-## Implementation Details
+## Implementation Details <a name="5"></a>
 
 The wiremock instance is run as a spring application in a docker container.
 Configuration files for the wiremock stubs (mappings, files, and querydata) are provided to the container as a bindmount directory.
@@ -306,13 +315,17 @@ At start-up, data from the /querydata directory is loaded into memory.
 Data is queried for a mock endpoint using the QueryDetails specified in the body file of the endpoint mapping.
 Query data can be reused for multiple endpoints.
 
-### Build & Run the App Code
+## Build the Docker Image <a name="6"></a>
+```shell script
+# navigate to the app directory
+cd app/querymock-app
 
-Build the docker image 
-* `./buildImage.sh`
+# build the spring boot app (skipping test execution)
+./gradlew clean build -x test
 
-Build the springbot app
-* `./gradlew clean build`
+# build the docker image
+./buildImage.sh
 
-Start mock as a springboot app (seed config data is provided under /src/main/resources/wiremock)
-* `./gradlew bootrun`
+# check that the image has been created (will print some info if present)
+docker images | grep querymock
+```
