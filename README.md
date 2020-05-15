@@ -208,7 +208,90 @@ Response body:
 ]
 ```
 
-### Implementation Details
+## Write a test with the QueryMock client (psuedo code example)
+
+Test resource directory with config json files for each test:
+```
+/test
+    /resources
+        /test1
+            /wiremock
+                /location
+                    /mappings
+                        getLocationById.json
+                    /__files
+                        queryLocationById.json
+                    /querydata
+                        location.json
+                /item
+                    /mappings
+                        getItemById.json
+                    /__files
+                        queryItemById.json
+                    /querydata
+                        item.json
+        /test2
+            /wiremock
+                /location
+                    /mappings
+                        getLocationById.json
+                    /__files
+                        queryLocationById.json
+                    /querydata
+                        location.json
+```
+
+Test Psuedo Code (utilizes mock reconfiguration for faster execution times)
+```
+String baseDirectory = "/test/resources"
+String locationMockName = "location-mock"
+String itemMockName = "item-mock"
+
+// utility method to ensure existing location-mock instances are reconfigured whenever possible
+startLocationMock(String wiremockSubDirectory)
+{
+    startMock(locationMockName, 8081, 8091, baseResourceDirectory, wiremockSubDirectory)
+}
+
+// utility method to ensure existing item-mock instances are reconfigured whenever possible
+startItemMock(String wiremockSubDirectory)
+{
+    startMock(itemMockName, 8082, 8092, baseResourceDirectory, wiremockSubDirectory)
+}
+
+test1()
+{
+    String testDirectory = "/test1/wiremock"
+
+    startLocationMock(testDirectory)
+    startItemMock(testDirectory)
+    waitForMocks(locationMockName, itemMockName)
+
+    // execute test code here...
+}
+
+test2()
+{
+    String testDirectory = "/test2/wiremock"
+
+    startLocationMock(testDirectory) // will reconfigure the existing location-mock
+    waitForMocks(locationMockName)
+
+    // execute test code here...
+}
+
+runAllTests()
+{
+    // execute tests
+    test1()
+    test2()
+    
+    // clean-up mocks
+    stopMocks(locationMockName, itemMockName)
+}
+```
+
+## Implementation Details
 
 The wiremock instance is run as a spring application in a docker container.
 Configuration files for the wiremock stubs (mappings, files, and querydata) are provided to the container as a bindmount directory.
