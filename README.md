@@ -250,13 +250,13 @@ String itemMockName = "item-mock"
 // utility method to ensure existing location-mock instances are reconfigured whenever possible
 startLocationMock(String wiremockSubDirectory)
 {
-    startMock(locationMockName, 8081, 8091, baseResourceDirectory, wiremockSubDirectory)
+    querymock.startMock(locationMockName, 8081, 8091, baseResourceDirectory, wiremockSubDirectory)
 }
 
 // utility method to ensure existing item-mock instances are reconfigured whenever possible
 startItemMock(String wiremockSubDirectory)
 {
-    startMock(itemMockName, 8082, 8092, baseResourceDirectory, wiremockSubDirectory)
+    querymock.startMock(itemMockName, 8082, 8092, baseResourceDirectory, wiremockSubDirectory)
 }
 
 test1()
@@ -265,7 +265,7 @@ test1()
 
     startLocationMock(testDirectory)
     startItemMock(testDirectory)
-    waitForMocks(locationMockName, itemMockName)
+    querymock.waitForMocks(locationMockName, itemMockName)
 
     // execute test code here...
 }
@@ -275,7 +275,7 @@ test2()
     String testDirectory = "/test2/wiremock"
 
     startLocationMock(testDirectory) // will reconfigure the existing location-mock
-    waitForMocks(locationMockName)
+    querymock.waitForMocks(locationMockName)
 
     // execute test code here...
 }
@@ -287,7 +287,7 @@ runAllTests()
     test2()
     
     // clean-up mocks
-    stopMocks(locationMockName, itemMockName)
+    querymock.stopMocks(locationMockName, itemMockName)
 }
 ```
 
