@@ -1,4 +1,4 @@
-### QueryMock Overview
+## QueryMock Overview
 
 A fast, containerized mock server that can mock query endpoints! 
 
@@ -30,12 +30,183 @@ For each mock endpoint, specify the...
 3. Response payload to hold the query result
     * json payload templated with request data
 
-See the following test data directories for example config data for a mocked endpoint:
-* getLocationById: `/src/test/query/test1/wiremock`
-* getLocationbyStatus:  `/src/test/query/test3/wiremock`
-    
 Note: At this time, the data to query cannot be templated with values from the http request. 
-The query result is substituted into the templated response payload as-is. 
+The query result is substituted into the templated response payload as-is.
+
+## Example 1: Get location by id
+
+Endpoint to mock: 
+* ```GET /location/{locationId}```
+* Query result is populated in the "Data" field of the reponse.
+
+Test directory with config files:
+```
+/mappings
+    getLocationById.json     <=== Endpoint Mapping
+/__files
+    queryLocationById.json   <=== Query Details
+/querydata
+    location.json            <=== Query Data
+```
+
+/mappings/getLocationById.json
+```json
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/location/([A-Za-z0-9-_]+)"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "queryLocationById.json",
+    "transformers": ["body-transformer", "query-transformer"],
+    "transformerParameters": {
+      "urlRegex": "/location/(?<id>.*?)"
+    }
+  }
+}
+```
+
+/__files/queryLocationById.json
+```json
+{
+  "query": "locationId == '$(id)'",
+  "data": "location.json",
+  "findOne": true,
+  "bodyTemplate": {
+    "Data": "{{ result }}"
+  }
+}
+```
+
+/querydata/location.json
+```json
+[
+  {
+    "locationId": "locationId_1",
+    "status": "open"
+  },
+  {
+    "locationId": "locationId_2",
+    "status": "open"
+  },
+  {
+    "locationId": "locationId_3",
+    "status": "closed"
+  }
+]
+```
+
+Input Request: ```GET /location/locationId_1```
+
+Body of response returned by the mock server:
+```json
+{
+  "Data": {
+    "locationId": "locationId_1",
+    "status": "open"
+  }
+}
+```
+
+Input Request: ```GET /location/locationId_3```
+
+Body of response returned by the mock server:
+```json
+{
+  "Data": {
+    "locationId": "locationId_3",
+    "status": "closed"
+  }
+}
+```
+
+## Example 2: Get locations by status
+
+#### Endpoint to mock:
+* ```GET /location?status=someValue```
+* Response is the query result as a list.
+
+#### Test directory with config files:
+```
+/mappings
+    getLocationByStatus.json     <=== Endpoint Mapping
+/__files
+    queryLocationByStatus.json   <=== Query Details
+/querydata
+    location.json                <=== Query Data
+```
+
+/mappings/getLocationByStatus.json
+```json
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/location\\?status=([A-Za-z0-9-_]+)"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "queryLocationByStatus.json",
+    "transformers": ["body-transformer", "query-transformer"]
+  }
+}
+```
+
+/__files/queryLocationByStatus.json
+```json
+{
+  "query": "status == '$(status)'",
+  "data": "location.json",
+  "findOne": false
+}
+```
+
+/querydata/location.json
+```json
+[
+  {
+    "locationId": "locationId_1",
+    "status": "open"
+  },
+  {
+    "locationId": "locationId_2",
+    "status": "open"
+  },
+  {
+    "locationId": "locationId_3",
+    "status": "closed"
+  }
+]
+```
+#### Responses from mock server:
+
+Input request: ```GET /location?status=open```
+
+Response body:
+```json
+[
+  {
+    "locationId": "locationId_1",
+    "status": "open"
+  },
+  {
+    "locationId": "locationId_2",
+    "status": "open"
+  }
+]
+```
+
+Input request: ```GET /location?status=closed```
+
+Response body:
+```json
+[
+  {
+    "locationId": "locationId_3",
+    "status": "closed"
+  }
+]
+```
 
 ### Implementation Details
 
