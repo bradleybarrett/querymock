@@ -210,7 +210,7 @@ Response body:
 
 ## Write a test with the QueryMock client (psuedo code example)
 
-Test resource directory with config json files for each test:
+#### Test resource directory with config json files for each test:
 ```
 /test
     /resources
@@ -241,7 +241,7 @@ Test resource directory with config json files for each test:
                         location.json
 ```
 
-Test Psuedo Code (utilizes mock reconfiguration for faster execution times)
+#### Test Psuedo Code (utilizes mock reconfiguration for faster execution times)
 ```
 String baseDirectory = "/test/resources"
 String locationMockName = "location-mock"
