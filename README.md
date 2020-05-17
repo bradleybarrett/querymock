@@ -259,13 +259,13 @@ String itemMockName = "item-mock"
 // utility method to ensure existing location-mock instances are reconfigured whenever possible
 startLocationMock(String wiremockSubDirectory)
 {
-    querymock.startMock(locationMockName, 8081, 8091, baseResourceDirectory, wiremockSubDirectory)
+    querymock.startMock(locationMockName, 8081, 8091, baseDirectory, wiremockSubDirectory)
 }
 
 // utility method to ensure existing item-mock instances are reconfigured whenever possible
 startItemMock(String wiremockSubDirectory)
 {
-    querymock.startMock(itemMockName, 8082, 8092, baseResourceDirectory, wiremockSubDirectory)
+    querymock.startMock(itemMockName, 8082, 8092, baseDirectory, wiremockSubDirectory)
 }
 
 test1()
