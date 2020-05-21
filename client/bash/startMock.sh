@@ -52,7 +52,7 @@ wiremockPortLabel=com.querymock.wiremock.port
 startNewMock()
 {
   echo "startNewMock() for $containerName"
-  docker run -it -d \
+  docker run -d \
   --name=$containerName \
   -l "$adminPortLabel=$adminPort" \
   -l "$wiremockPortLabel=$wiremockPort" \

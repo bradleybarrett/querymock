@@ -33,7 +33,7 @@ def _startNewMock(name: str, adminPort: int, wiremockPort: int, resourceDir: str
     containerResourceDirectory = "/wiremock"
 
     print(f'Start new mock with name: {name}, adminPort: {adminPort}, wiremockPort: {wiremockPort}')
-    subprocess.run(["docker", "run", "-it", "-d",
+    subprocess.run(["docker", "run", "-d",
         "--name", name,
         "-l", adminPortLabel + "=" + str(adminPort),
         "-l", wiremockPortLabel + "=" + str(wiremockPort),

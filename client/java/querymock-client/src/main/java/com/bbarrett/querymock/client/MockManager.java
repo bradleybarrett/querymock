@@ -203,7 +203,7 @@ public class MockManager
         int containerWiremockPort = 8081;
         String containerResourceDirectory = "/wiremock";
 
-        executeCommand("docker", "run", "-it", "-d",
+        executeCommand("docker", "run", "-d",
                 "--name", name,
                 "-l", adminPortLabel + "=" + adminPort,
                 "-l", wiremockPortLabel + "=" + wiremockPort,
