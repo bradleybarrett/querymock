@@ -313,14 +313,8 @@ Query data can be reused for multiple endpoints.
 
 ## Build the Docker Image <a name="6"></a>
 ```shell script
-# navigate to the app directory
-cd app/querymock-app
-
-# build the spring boot app (skipping test execution)
-./gradlew clean build -x test
-
-# build the docker image
-./buildImage.sh
+# navigate to the app directory and build the docker image
+cd app/querymock-app && ./docker-build.sh && cd ../..
 
 # check that the image has been created (will print some info if present)
 docker images | grep querymock
