@@ -279,7 +279,7 @@ test1()
 
 test2()
 {
-    startLocationMock("/test2/wiremock/location) // will reconfigure the existing location-mock
+    startLocationMock("/test2/wiremock/location") // will reconfigure the existing location-mock
     querymock.waitForMocks(locationMockName)
 
     // execute test code here...
